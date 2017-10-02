@@ -1,7 +1,7 @@
 class ApiUsersController < ApplicationController
   def index
-    render status: 200
-   end
+    render plain: 'Available Commands: get, post --- Available Endpoints: /userId'
+  end
   
   def create
 	render status: 201

@@ -1,5 +1,5 @@
 class ApiVOneController < ApplicationController
   def index
-    render text: 'Welcome to the API'
+    render plain: 'Available Endpoints: /users /events'
    end
 end

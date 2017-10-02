@@ -1,6 +1,6 @@
 class ApiEventController < ApplicationController
   def show
-    render status: 200
+    render plain: 'Available Commands: get, put --- Available Endpoints: /reviews'
   end
   
   def update

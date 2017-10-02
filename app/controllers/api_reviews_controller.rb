@@ -1,7 +1,7 @@
 class ApiReviewsController < ApplicationController
   def index
-    render status: 200
-   end
+    render plain: 'Available Commands: get, post --- Available Endpoints: /reviewId'
+  end
   
   def create
 	render status: 201

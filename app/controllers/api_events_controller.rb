@@ -1,7 +1,7 @@
 class ApiEventsController < ApplicationController
   def index
-    render status: 200
-   end
+    render plain: 'Available Commands: get, post --- Available Endpoints: /eventId'
+  end
   
   def create
 	render status: 201

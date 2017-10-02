@@ -1,6 +1,6 @@
 class ApiReviewController < ApplicationController
   def show
-    render status: 200
+    render plain: 'Available Commands: get, put'
   end
   
   def update
