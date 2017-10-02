@@ -1,4 +1,4 @@
-class ApiUserController < ApplicationController
+class ApiReviewController < ApplicationController
   def show
     render status: 200
   end
