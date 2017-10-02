@@ -1,14 +1,6 @@
 class ApiUserController < ApplicationController
   def show
-    require 'json'
-
-    user = {
-      'email' => 'joshua_smolinski@student.uml.edu'
-	  'name' => 'Josh Smolinski'
-	  'rating' => 87
-    }
-
-	render json: JSON[user]
+    render status: 200
   end
   
   def update

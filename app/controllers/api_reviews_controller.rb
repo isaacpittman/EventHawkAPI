@@ -1,12 +1,6 @@
 class ApiUsersController < ApplicationController
   def index
-    require 'json'
-
-    reviews = {
-      'reviewIds' => ['001','002','003','004','005']
-    }
-
-	render json: JSON[reviews]
+    render status: 200
    end
   
   def create

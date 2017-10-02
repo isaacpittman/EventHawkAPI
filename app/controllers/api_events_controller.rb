@@ -1,12 +1,6 @@
 class ApiEventsController < ApplicationController
   def index
-    require 'json'
-
-    events = {
-      'eventIds' => ['001','002','003','004','005']
-    }
-
-	render json: JSON[events]
+    render status: 200
    end
   
   def create
