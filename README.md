@@ -1,24 +1,11 @@
-# README
+# EventHawkAPI
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## The EventHawk Team:
+* Josh Smolinski
+* Satwik Gardas
+* Saurabh Verma
+* Isaac Pittman
 
-Things you may want to cover:
+## What is the EventHawkAPI:
 
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+The EventHawkAPI is the backend application responsible for managing and serving Events and their associated resources, such as Users and Reviews. It resides in a separate Git project because of constraints in Heroku. For information on the main EventHawk projects, navigate [here](https://github.com/sv-uml/EventHawk).
