@@ -9,22 +9,22 @@ Rails.application.routes.draw do
           get '/' => 'api_users#index'
           post '/' => 'api_users#create'
           scope '/:userId' do
-            get '/' => 'api_user#show'
-            put '/' => 'api_user#update'
+            get '/' => 'api_users#show'
+            put '/' => 'api_users#update'
 		  end
 	    end
 	    scope '/events' do
 		  get '/' => 'api_events#index'
 		  post '/' => 'api_events#create'
 		  scope '/:eventId' do
-            get '/' => 'api_event#show'
-            put '/' => 'api_event#update'
+            get '/' => 'api_events#show'
+            put '/' => 'api_events#update'
 		    scope '/reviews' do
 			  get '/' => 'api_reviews#index'
 			  post '/' => 'api_reviews#create'
 			  scope '/:reviewId' do
-			    get '/' => 'api_review#show'
-			    put '/' => 'api_review#update'
+			    get '/' => 'api_reviews#show'
+			    put '/' => 'api_reviews#update'
 			  end
 		    end
           end

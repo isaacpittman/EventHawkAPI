@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  reviewer_id: MyString
+  host_prep: MyString
+  matched_desc: MyString
+  would_ret: MyString
+
+two:
+  reviewer_id: MyString
+  host_prep: MyString
+  matched_desc: MyString
+  would_ret: MyString

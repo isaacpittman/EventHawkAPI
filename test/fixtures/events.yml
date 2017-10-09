@@ -1,0 +1,29 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  description: MyString
+  time: MyString
+  location: MyString
+  current_capacity: MyString
+  total_capacity: MyString
+  interest_rating: MyString
+  category: MyString
+  host_id: MyString
+  review_host_prep: MyString
+  review_matched_desc: MyString
+  review_would_ret: MyString
+
+two:
+  name: MyString
+  description: MyString
+  time: MyString
+  location: MyString
+  current_capacity: MyString
+  total_capacity: MyString
+  interest_rating: MyString
+  category: MyString
+  host_id: MyString
+  review_host_prep: MyString
+  review_matched_desc: MyString
+  review_would_ret: MyString
