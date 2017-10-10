@@ -3,15 +3,13 @@ development:
   clients:
     # Defines the default client. (required)
     default:
-      # Defines the name of the default database that Mongoid can connect to.
-      # (required).
-      database: eventhawk_api_development
-      # Provides the hosts the default client can connect to. Must be an array
-      # of host:port pairs. (required)
-      hosts:
-        - localhost:27017
+      uri: mongodb://eventhawkapi:Great4Data!@ds051720.mlab.com:51720/eventhawkapi
       options:
-        # Change the default write concern. (default = { w: 1 })
+        consistency: :strong
+        max_retries: 15
+        retry_interval: 1
+        timeout: 15
+      # Change the default write concern. (default = { w: 1 })
         # write:
         #   w: 1
 
@@ -155,3 +153,15 @@ test:
         read:
           mode: :primary
         max_pool_size: 1
+        
+production:
+  sessions:
+    default:
+      uri: mongodb://eventhawkapi:Great4Data@ds051720.mlab.com:51720/eventhawkapi
+      options:
+        consistency: :strong
+        max_retries: 15
+        retry_interval: 1
+        timeout: 15
+        safe: true
+        refresh_interval: 10
