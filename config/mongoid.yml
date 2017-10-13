@@ -3,12 +3,12 @@ development:
   clients:
     # Defines the default client. (required)
     default:
-      uri: mongodb://eventhawkapi:Great4Data!@ds051720.mlab.com:51720/eventhawkapi
+      database: eventhawkapi
+      hosts: 
+        - ds051720.mlab.com:51720
       options:
-        consistency: :strong
-        max_retries: 15
-        retry_interval: 1
-        timeout: 15
+        user: 'eventhawkapi'
+        password: 'Great4Data!'
       # Change the default write concern. (default = { w: 1 })
         # write:
         #   w: 1
@@ -146,22 +146,19 @@ development:
 test:
   clients:
     default:
-      database: eventhawk_api_test
-      hosts:
-        - localhost:27017
+      database: eventhawkapi
+      hosts: 
+        - ds051720.mlab.com:51720
       options:
-        read:
-          mode: :primary
-        max_pool_size: 1
+        user: 'eventhawkapi'
+        password: 'Great4Data!'
         
 production:
-  sessions:
+  clients:
     default:
-      uri: mongodb://eventhawkapi:Great4Data@ds051720.mlab.com:51720/eventhawkapi
+      database: eventhawkapi
+      hosts: 
+        - ds051720.mlab.com:51720
       options:
-        consistency: :strong
-        max_retries: 15
-        retry_interval: 1
-        timeout: 15
-        safe: true
-        refresh_interval: 10
+        user: 'eventhawkapi'
+        password: 'Great4Data!'

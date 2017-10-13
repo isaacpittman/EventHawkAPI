@@ -5,28 +5,36 @@ Rails.application.routes.draw do
 	  get '/', to: redirect('/v1')
       scope '/v1' do
 	    get '/' => 'api_v_one#index'
+		scope '/login' do
+		  post '/' => 'user_token#create'
+		end
         scope '/users' do
-          get '/' => 'api_users#index'
-          post '/' => 'api_users#create'
+          post '/' => 'users#create'
           scope '/:userId' do
-            get '/' => 'api_users#show'
-            put '/' => 'api_users#update'
+            get '/' => 'users#show'
+            put '/' => 'users#update'
 		  end
 	    end
 	    scope '/events' do
-		  get '/' => 'api_events#index'
-		  post '/' => 'api_events#create'
+		  get '/' => 'events#index'
+		  post '/' => 'events#create'
 		  scope '/:eventId' do
-            get '/' => 'api_events#show'
-            put '/' => 'api_events#update'
+            get '/' => 'events#show'
+            put '/' => 'events#update'
 		    scope '/reviews' do
-			  get '/' => 'api_reviews#index'
-			  post '/' => 'api_reviews#create'
+			  post '/' => 'reviews#create'
 			  scope '/:reviewId' do
-			    get '/' => 'api_reviews#show'
-			    put '/' => 'api_reviews#update'
+			    get '/' => 'reviews#show'
+			    put '/' => 'reviews#update'
 			  end
 		    end
+			scope '/votes' do
+			  post '/' => 'votes#create'
+			  scope '/:voteId' do
+			    get '/' => 'votes#show'
+				put '/' => 'votes#update'
+			  end
+			end  
           end
         end
       end

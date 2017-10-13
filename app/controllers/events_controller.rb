@@ -1,16 +1,16 @@
-class ApiEventsController < ApplicationController
+class EventsController < ApplicationController
   before_action :set_event, only: [:show, :update]
 
   # GET /events
   def index
     @events = Event.all
 
-    render json: @events
+    render json: @events, status: :ok
   end
   
   # GET /events/1
   def show
-    render json: @event
+    render json: @event, status: :ok
   end
   
   # POST /events
@@ -27,7 +27,7 @@ class ApiEventsController < ApplicationController
   # PATCH/PUT /events/1
   def update
     if @event.update(event_params)
-      render json: @event
+      render json: @event, status: :accepted
     else
       render json: @event.errors, status: :unprocessable_entity
     end
