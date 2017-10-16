@@ -1,5 +1,6 @@
 class Event
   include Mongoid::Document
+  field :event_id, type: String
   field :name, type: String
   field :description, type: String
   field :time, type: DateTime
