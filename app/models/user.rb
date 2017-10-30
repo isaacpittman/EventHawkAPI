@@ -10,4 +10,14 @@ class User
   field :rating, type: Float
   
   has_secure_password
+
+  def to_token_payload
+    hash = {
+        "user_id" => self.user_id
+    }
+  end
+
+  def self.from_token_payload payload
+    self.where(user_id: payload["user_id"]);
+  end
 end
