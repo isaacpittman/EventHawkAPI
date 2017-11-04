@@ -13,4 +13,15 @@ class Event
   field :review_host_prep, type: Float
   field :review_matched_desc, type: Float
   field :review_would_ret, type: Float
+
+  validates :event_id, presence: true
+  validates :name, presence: true
+  validates :description, presence: true
+  validates :time, presence: true
+  validates :location, presence: true
+  validates :current_capacity, presence: true
+  validates :total_capacity, presence: true
+  validates :interest_rating, presence: true
+  validates :category, presence: true
+  validates :host_id, presence: true
 end
