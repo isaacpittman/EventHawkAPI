@@ -1,5 +1,5 @@
 class ApiVOneController < ApplicationController
   def index
-    render plain: 'Available Endpoints: /users /events'
+    render plain: 'Welcome to the EventHawk API'
    end
 end

@@ -21,7 +21,6 @@ class EventsController < ApplicationController
   def create
     @event = Event.new(event_params)
     @event.event_id = generate_guid
-    @event.host_id = get_user_id
 
     if @event.save
       render :json => @event.to_json(:except => :_id), status: :created
@@ -47,25 +46,10 @@ class EventsController < ApplicationController
   
   # Only allow a trusted parameter "white list" through.
   def event_params
-    params.require(:event).permit(:name, :description, :time, :location, :current_capacity, :total_capacity, :interest_rating, :category)
+    params.require(:event).permit(:name, :description, :time, :location, :current_capacity, :total_capacity, :interest_rating, :category, :host_id)
   end
 
   def generate_guid
     SecureRandom.hex(10)
-  end
-
-  def get_user_id
-    decoded_token = JWT.decode token, Rails.application.secrets.secret_key_base, true, { :algorithm => 'HS256' }
-    (decoded_token[0])['user_id']
-  end
-
-  def token
-    params[:token] || token_from_request_headers
-  end
-
-  def token_from_request_headers
-    unless request.headers['Authorization'].nil?
-      request.headers['Authorization'].split.last
-    end
   end
 end
