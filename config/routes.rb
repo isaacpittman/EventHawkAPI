@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :tickets
   scope '/' do
     get '/', to: redirect('/api/v1')
     scope '/api' do
@@ -36,6 +37,13 @@ Rails.application.routes.draw do
 			    	get '/' => 'votes#show'
 						put '/' => 'votes#update'
 			  	end
+        end
+        scope '/tickets' do
+          post '/' => 'tickets#create'
+          scope '/:ticketId' do
+            get '/' => 'tickets#show'
+            put '/' => 'tickets#update'
+					end
 				end
       end
     end

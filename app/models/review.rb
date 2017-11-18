@@ -8,6 +8,7 @@ class Review
   field :matched_desc, type: Integer
   field :would_ret, type: Boolean
   field :event_id, type: String
+  field :is_active, type: Boolean
 
   validates :review_id, presence: true
   validates :reviewer_id, presence: true

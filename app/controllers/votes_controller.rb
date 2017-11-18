@@ -3,7 +3,6 @@ class VotesController < ApplicationController
   before_action :set_vote, only: [:show, :update]
   # TODO Enforce one vote per user per event
   # TODO Enforce GUID uniqueness
-  # TODO Fix put
 
   # GET /votes/1
   def show
@@ -18,6 +17,7 @@ class VotesController < ApplicationController
       render :json => @vote.to_json(:except => :_id), status: :conflict
     rescue Mongoid::Errors::DocumentNotFound
       @vote = Vote.create(p)
+      @vote.is_active = true
       @vote.vote_id = generate_guid
       if @vote.save
         render :json => @vote.to_json(:except => :_id), status: :created

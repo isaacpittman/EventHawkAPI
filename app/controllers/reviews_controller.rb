@@ -3,7 +3,6 @@ class ReviewsController < ApplicationController
   before_action :set_review, only: [:show, :update]
   # TODO Enforce one vote per user per event
   # TODO Enforce GUID uniqueness
-  # TODO Fix put
 
   # GET /reviews/1
   def show
@@ -18,6 +17,7 @@ class ReviewsController < ApplicationController
       render :json => @review.to_json(:except => :_id), status: :conflict
     rescue Mongoid::Errors::DocumentNotFound
       @review = Review.new(p)
+      @review.is_active = true
       @review.review_id = generate_guid
       if @review.save
         render :json => @review.to_json(:except => :_id), status: :created

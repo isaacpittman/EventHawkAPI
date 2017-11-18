@@ -4,11 +4,18 @@ class EventsController < ApplicationController
 
   # TODO Enforce GUID uniqueness
   # TODO Enable delete
-  # TODO Fix put
 
   # GET /events
   def index
-    @events = Event.all.only(:event_id)
+    if params.key?("category")
+      @events = Event.where(category: params[:category]).only(:event_id)
+    elsif params.key?("attendedBy")
+      @events = Ticket.where(attendee_id: params[:attendedBy], attending: true).only(:event_id)
+    elsif params.key?("hostedBy")
+      @events = Event.where(host_id: params[:hostedBy]).only(:event_id)
+    else
+      @events = Event.all.only(:event_id)
+    end
     idArray = []
     @events.each do |p|
       idArray.push p.event_id
@@ -29,7 +36,7 @@ class EventsController < ApplicationController
       render :json => @event.to_json(:except => :_id), status: :conflict
     rescue Mongoid::Errors::DocumentNotFound
       @event = Event.new(post_params)
-      @event.current_capacity = 0
+      @event.is_active = true
       @event.event_id = generate_guid
       if @event.save
         render :json => @event.to_json(:except => :_id), status: :created
@@ -51,19 +58,26 @@ class EventsController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_event
-    params.delete :interest_rating
+    params.delete :_interest_rating
+    params.delete :_current_capacity
+    params.delete :_review_matched_desc
+    params.delete :_review_host_prep
+    params.delete :_review_would_ret
+    params.delete :_my_vote
+    params.delete :_my_review
+    params.delete :_my_ticket
     @event = Event.find_by(event_id: params[:eventId])
   end
   
   # Only allow a trusted parameter "white list" through.
   def post_params
-    params.require(:event).permit(:name, :description, :time, :location, :current_capacity, :total_capacity, :category, :host_id)
+    params.require(:event).permit(:name, :description, :time, :location, :total_capacity, :category, :host_id)
   end
 
   def put_params
     params.delete :event_id
     params.delete :host_id
-    params.permit(:name, :description, :time, :location, :current_capacity, :total_capacity, :category)
+    params.permit(:name, :description, :time, :location, :total_capacity, :category)
   end
 
   def generate_guid

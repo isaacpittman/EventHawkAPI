@@ -4,7 +4,6 @@ class UsersController < ApplicationController
 
   # TODO Enforce GUID uniqueness
   # TODO Enable delete
-  # TODO Fix put
 
   # GET /users/1
   def show
@@ -19,6 +18,7 @@ class UsersController < ApplicationController
       render status: :conflict
     rescue Mongoid::DocumentNotFound
       @user = User.new(p)
+      @user.is_active = true
       @user.user_id = generate_guid
       if @user.save
         render :json => @user.to_json(:except => :_id), status: :created
@@ -40,9 +40,6 @@ class UsersController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_user
-      params.delete :matched_desc
-      params.delete :host_prep
-      params.delete :would_ret
       @user = User.find_by(user_id: params[:userId])
     end
 
@@ -54,8 +51,6 @@ class UsersController < ApplicationController
     def put_params
       params.delete :user_id
       params.delete :email
-      params.delete :password
-      params.delete :password_digest
       params.permit(:first_name, :last_name)
     end
 
