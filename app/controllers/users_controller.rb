@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
-  before_action :authenticate_user, only: [:show, :update]
-  before_action :set_user, only: [:show, :update]
+  before_action :authenticate_user, only: [:show]
+  before_action :set_user, only: [:show]
 
   # TODO Enforce GUID uniqueness
   # TODO Enable delete
@@ -28,15 +28,6 @@ class UsersController < ApplicationController
     end
   end
 
-  # PATCH/PUT /users/1
-  def update
-    if @user.update(put_params)
-      render :json => @user.to_json(:except => :_id), status: :accepted
-    else
-      render json: @user.errors, status: :unprocessable_entity
-    end
-  end
-
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_user
@@ -46,12 +37,6 @@ class UsersController < ApplicationController
     # Only allow a trusted parameter "white list" through.
     def post_params
       params.require(:user).permit(:first_name, :last_name, :email, :password)
-    end
-
-    def put_params
-      params.delete :user_id
-      params.delete :email
-      params.permit(:first_name, :last_name)
     end
 
     def generate_guid

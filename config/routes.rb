@@ -13,7 +13,6 @@ Rails.application.routes.draw do
           post '/' => 'users#create'
           scope '/:userId' do
             get '/' => 'users#show'
-            put '/' => 'users#update'
 		  		end
 	    	end
 	    	scope '/events' do
