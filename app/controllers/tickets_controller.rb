@@ -19,6 +19,7 @@ class TicketsController < ApplicationController
       @ticket = Ticket.create(p)
       @ticket.is_active = true
       @ticket.ticket_id = generate_guid
+      @ticket.attendee_id = get_user_id
       if @ticket.save
         render :json => @ticket.to_json(:except => :_id), status: :created
       else
@@ -56,5 +57,20 @@ class TicketsController < ApplicationController
 
   def generate_guid
     SecureRandom.hex(10)
+  end
+
+  def get_user_id
+    decoded_token = JWT.decode token, Rails.application.secrets.secret_key_base, true, { :algorithm => 'HS256' }
+    (decoded_token[0])['user_id']
+  end
+
+  def token
+    params[:token] || token_from_request_headers
+  end
+
+  def token_from_request_headers
+    unless request.headers['Authorization'].nil?
+      request.headers['Authorization'].split.last
+    end
   end
 end
