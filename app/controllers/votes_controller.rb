@@ -12,13 +12,18 @@ class VotesController < ApplicationController
 
   # POST /votes
   def create
-    @vote = Vote.new(post_params)
-    @vote.vote_id = generate_guid
-
-    if @vote.save
-      render :json => @vote.to_json(:except => :_id), status: :created
-    else
-      render json: @vote.errors, status: :unprocessable_entity
+    p = post_params
+    begin
+      @vote = Vote.find_by(voter_id: p[:voter_id], event_id: p[:event_id])
+      render :json => @vote.to_json(:except => :_id), status: :conflict
+    rescue Mongoid::Errors::DocumentNotFound
+      @vote = Vote.create(p)
+      @vote.vote_id = generate_guid
+      if @vote.save
+        render :json => @vote.to_json(:except => :_id), status: :created
+      else
+        render json: @vote.errors, status: :unprocessable_entity
+      end
     end
   end
 
@@ -34,7 +39,7 @@ class VotesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_vote
-      @vote = Vote.where(vote_id: params[:voteId])
+      @vote = Vote.find_by(vote_id: params[:voteId])
     end
 
     # Only allow a trusted parameter "white list" through.
@@ -46,7 +51,7 @@ class VotesController < ApplicationController
       params.delete :vote_id
       params.delete :voter_id
       params.delete :event_id
-      params.require(:vote).permit(:value)
+      params.permit(:value)
     end
 
     def generate_guid

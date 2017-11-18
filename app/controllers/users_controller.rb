@@ -2,7 +2,6 @@ class UsersController < ApplicationController
   before_action :authenticate_user, only: [:show, :update]
   before_action :set_user, only: [:show, :update]
 
-  # TODO Ensure no duplicates
   # TODO Enforce GUID uniqueness
   # TODO Enable delete
   # TODO Fix put
@@ -14,13 +13,18 @@ class UsersController < ApplicationController
 
   # POST /users
   def create
-    @user = User.new(post_params)
-    @user.user_id = generate_guid
-
-    if @user.save
-      render :json => @user.to_json(:except => :_id), status: :created
-    else
-      render json: @user.errors, status: :unprocessable_entity
+    p = post_params
+    begin
+      @user = User.find_by(email: p[:email])
+      render status: :conflict
+    rescue Mongoid::DocumentNotFound
+      @user = User.new(p)
+      @user.user_id = generate_guid
+      if @user.save
+        render :json => @user.to_json(:except => :_id), status: :created
+      else
+        render json: @user.errors, status: :unprocessable_entity
+      end
     end
   end
 
@@ -39,7 +43,7 @@ class UsersController < ApplicationController
       params.delete :matched_desc
       params.delete :host_prep
       params.delete :would_ret
-      @user = User.where(user_id: params[:userId])
+      @user = User.find_by(user_id: params[:userId])
     end
 
     # Only allow a trusted parameter "white list" through.
@@ -52,7 +56,7 @@ class UsersController < ApplicationController
       params.delete :email
       params.delete :password
       params.delete :password_digest
-      params.require(:user).permit(:first_name, :last_name)
+      params.permit(:first_name, :last_name)
     end
 
     def generate_guid

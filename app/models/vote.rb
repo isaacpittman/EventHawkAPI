@@ -1,5 +1,7 @@
 class Vote
   include Mongoid::Document
+  store_in collection: "votes"
+
   field :vote_id, type: String
   field :voter_id, type: String
   field :value, type: Integer

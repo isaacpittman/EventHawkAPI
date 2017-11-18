@@ -12,13 +12,18 @@ class ReviewsController < ApplicationController
 
   # POST /reviews
   def create
-    @review = Review.new(post_params)
-    @review.review_id = generate_guid
-
-    if @review.save
-      render :json => @review.to_json(:except => :_id), status: :created
-    else
-      render json: @review.errors, status: :unprocessable_entity
+    p = post_params
+    begin
+      @review = Review.find_by(reviewer_id: p[:reviewer_id], event_id: p[:event_id])
+      render :json => @review.to_json(:except => :_id), status: :conflict
+    rescue Mongoid::Errors::DocumentNotFound
+      @review = Review.new(p)
+      @review.review_id = generate_guid
+      if @review.save
+        render :json => @review.to_json(:except => :_id), status: :created
+      else
+        render json: @review.errors, status: :unprocessable_entity
+      end
     end
   end
 
@@ -34,7 +39,7 @@ class ReviewsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_review
-      @review = Review.find(params[:review_id])
+      @review = Review.find_by(review_id: params[:reviewId])
     end
 
     # Only allow a trusted parameter "white list" through.
@@ -42,11 +47,12 @@ class ReviewsController < ApplicationController
       params.require(:review).permit(:host_prep, :matched_desc, :would_ret, :reviewer_id, :event_id)
     end
 
+    #TODO Move this to validation and supply an error
     def put_params
       params.delete :review_id
       params.delete :reviewer_id
       params.delete :event_id
-      params.require(:review).permit(:host_prep, :matched_desc, :would_ret)
+      params.permit(:host_prep, :matched_desc, :would_ret)
     end
 
     def generate_guid

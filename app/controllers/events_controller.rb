@@ -2,7 +2,6 @@ class EventsController < ApplicationController
   before_action :authenticate_user
   before_action :set_event, only: [:show, :update]
 
-  # TODO Ensure no duplicates
   # TODO Enforce GUID uniqueness
   # TODO Enable delete
   # TODO Fix put
@@ -24,14 +23,19 @@ class EventsController < ApplicationController
   
   # POST /events
   def create
-    @event = Event.new(post_params)
-    @event.current_capacity = 0
-    @event.event_id = generate_guid
-
-    if @event.save
-      render :json => @event.to_json(:except => :_id), status: :created
-    else
-      render json: @event.errors, status: :unprocessable_entity
+    p = post_params
+    begin
+      @event = Event.find_by(p)
+      render :json => @event.to_json(:except => :_id), status: :conflict
+    rescue Mongoid::Errors::DocumentNotFound
+      @event = Event.new(post_params)
+      @event.current_capacity = 0
+      @event.event_id = generate_guid
+      if @event.save
+        render :json => @event.to_json(:except => :_id), status: :created
+      else
+        render json: @event.errors, status: :unprocessable_entity
+      end
     end
   end
   
@@ -48,7 +52,7 @@ class EventsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_event
     params.delete :interest_rating
-    @event = Event.where(event_id: params[:eventId])
+    @event = Event.find_by(event_id: params[:eventId])
   end
   
   # Only allow a trusted parameter "white list" through.
@@ -59,7 +63,7 @@ class EventsController < ApplicationController
   def put_params
     params.delete :event_id
     params.delete :host_id
-    params.require(:event).permit(:name, :description, :time, :location, :current_capacity, :total_capacity, :category)
+    params.permit(:name, :description, :time, :location, :current_capacity, :total_capacity, :category)
   end
 
   def generate_guid
