@@ -13,12 +13,19 @@ class ReviewsController < ApplicationController
   def create
     p = post_params
     begin
-      @review = Review.find_by(reviewer_id: p[:reviewer_id], event_id: p[:event_id])
+      @jwt_token_user = User.find_by(user_id: get_user_id)
+    rescue Mongoid::Errors::DocumentNotFound
+      render status: :bad_request
+      return
+    end
+    begin
+      @review = Review.find_by(reviewer_id: @jwt_token_user.user_id, event_id: p[:event_id])
       render :json => @review.to_json(:except => :_id), status: :conflict
     rescue Mongoid::Errors::DocumentNotFound
       @review = Review.new(p)
       @review.is_active = true
       @review.review_id = generate_guid
+      @review.reviewer_id = @jwt_token_user.user_id
       if @review.save
         render :json => @review.to_json(:except => :_id), status: :created
       else
@@ -44,7 +51,7 @@ class ReviewsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def post_params
-      params.require(:review).permit(:host_prep, :matched_desc, :would_ret, :reviewer_id, :event_id)
+      params.require(:review).permit(:host_prep, :matched_desc, :would_ret, :event_id)
     end
 
     #TODO Move this to validation and supply an error
@@ -57,5 +64,20 @@ class ReviewsController < ApplicationController
 
     def generate_guid
       SecureRandom.hex(10)
+    end
+
+    def get_user_id
+      decoded_token = JWT.decode token, Rails.application.secrets.secret_key_base, true, { :algorithm => 'HS256' }
+      (decoded_token[0])['user_id']
+    end
+
+    def token
+      params[:token] || token_from_request_headers
+    end
+
+    def token_from_request_headers
+      unless request.headers['Authorization'].nil?
+        request.headers['Authorization'].split.last
+      end
     end
 end

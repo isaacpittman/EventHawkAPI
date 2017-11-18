@@ -13,13 +13,19 @@ class TicketsController < ApplicationController
   def create
     p = post_params
     begin
-      @ticket = Ticket.find_by(ticket_id: p[:ticket_id], event_id: p[:event_id])
+      @jwt_token_user = User.find_by(user_id: get_user_id)
+    rescue Mongoid::Errors::DocumentNotFound
+      render status: :bad_request
+      return
+    end
+    begin
+      @ticket = Ticket.find_by(attendee_id: @jwt_token_user.user_id, event_id: p[:event_id])
       render :json => @ticket.to_json(:except => :_id), status: :conflict
     rescue Mongoid::Errors::DocumentNotFound
       @ticket = Ticket.create(p)
       @ticket.is_active = true
       @ticket.ticket_id = generate_guid
-      @ticket.attendee_id = get_user_id
+      @ticket.attendee_id = @jwt_token_user.user_id
       if @ticket.save
         render :json => @ticket.to_json(:except => :_id), status: :created
       else
@@ -45,7 +51,7 @@ class TicketsController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def post_params
-    params.require(:ticket).permit(:attending, :attendee_id, :event_id)
+    params.require(:ticket).permit(:attending, :event_id)
   end
 
   def put_params

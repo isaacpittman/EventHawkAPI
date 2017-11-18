@@ -32,12 +32,19 @@ class EventsController < ApplicationController
   def create
     p = post_params
     begin
+      @jwt_token_user = User.find_by(user_id: get_user_id)
+    rescue Mongoid::Errors::DocumentNotFound
+      render status: :bad_request
+      return
+    end
+    begin
       @event = Event.find_by(p)
       render :json => @event.to_json(:except => :_id), status: :conflict
     rescue Mongoid::Errors::DocumentNotFound
       @event = Event.new(post_params)
       @event.is_active = true
       @event.event_id = generate_guid
+      @event.host_id = @jwt_token_user.user_id
       if @event.save
         render :json => @event.to_json(:except => :_id), status: :created
       else
@@ -71,7 +78,7 @@ class EventsController < ApplicationController
   
   # Only allow a trusted parameter "white list" through.
   def post_params
-    params.require(:event).permit(:name, :description, :time, :location, :total_capacity, :category, :host_id)
+    params.require(:event).permit(:name, :description, :time, :location, :total_capacity, :category)
   end
 
   def put_params
@@ -82,5 +89,20 @@ class EventsController < ApplicationController
 
   def generate_guid
     SecureRandom.hex(10)
+  end
+
+  def get_user_id
+    decoded_token = JWT.decode token, Rails.application.secrets.secret_key_base, true, { :algorithm => 'HS256' }
+    (decoded_token[0])['user_id']
+  end
+
+  def token
+    params[:token] || token_from_request_headers
+  end
+
+  def token_from_request_headers
+    unless request.headers['Authorization'].nil?
+      request.headers['Authorization'].split.last
+    end
   end
 end
