@@ -7,7 +7,6 @@ class Event
   field :description, type: String
   field :time, type: DateTime
   field :location, type: String
-  field :current_capacity, type: Integer
   field :total_capacity, type: Integer
   field :category, type: String
   field :host_id, type: String

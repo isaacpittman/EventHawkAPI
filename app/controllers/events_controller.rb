@@ -55,10 +55,21 @@ class EventsController < ApplicationController
   
   # PATCH/PUT /events/1
   def update
-    if @event.update(put_params)
-      render :json => @event.to_json(:except => :_id), status: :accepted
-    else
-      render json: @event.errors, status: :unprocessable_entity
+    begin
+      @jwt_token_user = User.find_by(user_id: get_user_id)
+      if @jwt_token_user.user_id == @event.host_id
+        if @event.update(put_params)
+          render :json => @event.to_json(:except => :_id), status: :accepted
+        else
+          render json: @event.errors, status: :unprocessable_entity
+        end
+      else
+        render status: :forbidden
+        return
+      end
+    rescue Mongoid::Errors::DocumentNotFound
+      render status: :bad_request
+      return
     end
   end
   

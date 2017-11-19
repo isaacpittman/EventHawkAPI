@@ -36,10 +36,21 @@ class TicketsController < ApplicationController
 
   # PATCH/PUT /tickets/1
   def update
-    if @ticket.update(put_params)
-      render :json => @ticket.to_json(:except => :_id), status: :accepted
-    else
-      render json: @ticket.errors, status: :unprocessable_entity
+    begin
+      @jwt_token_user = User.find_by(user_id: get_user_id)
+      if @jwt_token_user.user_id == @ticket.attendee_id
+        if @ticket.update(put_params)
+          render :json => @ticket.to_json(:except => :_id), status: :accepted
+        else
+          render json: @ticket.errors, status: :unprocessable_entity
+        end
+      else
+        render status: :forbidden
+        return
+      end
+    rescue Mongoid::Errors::DocumentNotFound
+      render status: :bad_request
+      return
     end
   end
 

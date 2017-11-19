@@ -36,10 +36,21 @@ class ReviewsController < ApplicationController
 
   # PATCH/PUT /reviews/1
   def update
-    if @review.update(put_params)
-      render :json => @review.to_json(:except => :_id), status: :accepted
-    else
-      render json: @review.errors, status: :unprocessable_entity
+    begin
+      @jwt_token_user = User.find_by(user_id: get_user_id)
+      if @jwt_token_user.user_id == @review.reviewer_id
+        if @review.update(put_params)
+          render :json => @review.to_json(:except => :_id), status: :accepted
+        else
+          render json: @review.errors, status: :unprocessable_entity
+        end
+      else
+        render status: :forbidden
+        return
+      end
+    rescue Mongoid::Errors::DocumentNotFound
+      render status: :bad_request
+      return
     end
   end
 
