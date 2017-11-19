@@ -69,6 +69,7 @@ class TicketsController < ApplicationController
     params.delete :ticket_id
     params.delete :attendee_id
     params.delete :event_id
+    params.delete :is_active
     params.permit(:attending)
   end
 

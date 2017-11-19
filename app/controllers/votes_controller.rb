@@ -69,6 +69,7 @@ class VotesController < ApplicationController
       params.delete :vote_id
       params.delete :voter_id
       params.delete :event_id
+      params.delete :is_active
       params.permit(:value)
     end
 

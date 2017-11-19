@@ -70,6 +70,7 @@ class ReviewsController < ApplicationController
       params.delete :review_id
       params.delete :reviewer_id
       params.delete :event_id
+      params.delete :is_active
       params.permit(:host_prep, :matched_desc, :would_ret)
     end
 

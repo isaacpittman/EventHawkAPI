@@ -95,6 +95,7 @@ class EventsController < ApplicationController
   def put_params
     params.delete :event_id
     params.delete :host_id
+    params.delete :is_active
     params.permit(:name, :description, :time, :location, :total_capacity, :category)
   end
 

@@ -11,6 +11,15 @@ class Ticket
   validates :ticket_id, presence: true
   validates :attendee_id, presence: true
   validates :event_id, presence: true
-  validates :attending, presence: true
+  validates :attending, presence: true, allow_nil: false
   validates :is_active, presence: true
+  validate :check_event
+
+  def check_event
+    begin
+      event = Event.find_by(event_id: self.event_id)
+    rescue Mongoid::Errors::DocumentNotFound
+      errors.add(:event_id, "Event ID must be a valid event")
+    end
+  end
 end

@@ -12,20 +12,11 @@ class Review
 
   validates :review_id, presence: true
   validates :reviewer_id, presence: true
-  validates :host_prep, presence: true
-  validates :matched_desc, presence: true
-  validates :would_ret, presence: true
+  validates :host_prep, presence: true, allow_nil: false, numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 5 }
+  validates :matched_desc, presence: true, allow_nil: false, numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 5 }
+  validates :would_ret, presence: true, allow_nil: false
   validates :event_id, presence: true
-  validate :check_reviewer
   validate :check_event
-
-  def check_reviewer
-    begin
-      user = User.find_by(user_id: self.reviewer_id)
-    rescue Mongoid::Errors::DocumentNotFound
-      errors.add(:reviewer_id, "Reviewer ID must be a valid user")
-    end
-  end
 
   def check_event
     begin
