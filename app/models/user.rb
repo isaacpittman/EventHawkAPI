@@ -2,7 +2,7 @@ class User
   include Mongoid::Document
   include ActiveModel::SecurePassword
   store_in collection: "users"
-  
+
   field :user_id, type: String
   field :first_name, type: String
   field :last_name, type: String

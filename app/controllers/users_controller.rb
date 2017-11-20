@@ -16,7 +16,7 @@ class UsersController < ApplicationController
     begin
       @user = User.find_by(email: p[:email])
       render status: :conflict
-    rescue Mongoid::DocumentNotFound
+    rescue Mongoid::Errors::DocumentNotFound
       @user = User.new(p)
       @user.is_active = true
       @user.user_id = generate_guid
@@ -29,17 +29,17 @@ class UsersController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_user
-      @user = User.find_by(user_id: params[:userId])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_user
+    @user = User.find_by(user_id: params[:id])
+  end
 
-    # Only allow a trusted parameter "white list" through.
-    def post_params
-      params.require(:user).permit(:first_name, :last_name, :email, :password)
-    end
+  # Only allow a trusted parameter "white list" through.
+  def post_params
+    params.require(:user).permit(:first_name, :last_name, :email, :password)
+  end
 
-    def generate_guid
-      SecureRandom.hex(10)
-    end
+  def generate_guid
+    SecureRandom.hex(10)
+  end
 end

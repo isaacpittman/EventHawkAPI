@@ -1,6 +1,6 @@
 class TicketsController < ApplicationController
   before_action :authenticate_user
-  before_action :set_ticket, only: [:show, :update]
+  before_action :set_ticket, only: [:show, :destroy]
   # TODO Enforce one vote per user per event
   # TODO Enforce GUID uniqueness
 
@@ -54,10 +54,15 @@ class TicketsController < ApplicationController
     end
   end
 
+  def destroy
+    @ticket.delete
+    render status: :accepted
+  end
+
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_ticket
-    @ticket = Ticket.find_by(ticket_id: params[:ticketId])
+    @ticket = Ticket.find_by(ticket_id: params[:id])
   end
 
   # Only allow a trusted parameter "white list" through.

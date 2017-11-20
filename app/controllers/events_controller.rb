@@ -10,7 +10,7 @@ class EventsController < ApplicationController
     if params.key?("category")
       @events = Event.where(category: params[:category]).only(:event_id)
     elsif params.key?("attendedBy")
-      @events = Ticket.where(attendee_id: params[:attendedBy], attending: true).only(:event_id)
+      @events = Ticket.where(attendee_id: params[:attendedBy]).only(:event_id)
     elsif params.key?("hostedBy")
       @events = Event.where(host_id: params[:hostedBy]).only(:event_id)
     else
@@ -22,12 +22,12 @@ class EventsController < ApplicationController
     end
     render :json => idArray.to_json, status: :ok
   end
-  
+
   # GET /events/1
   def show
     render :json => @event.to_json(:except => :_id), status: :ok
   end
-  
+
   # POST /events
   def create
     p = post_params
@@ -52,7 +52,7 @@ class EventsController < ApplicationController
       end
     end
   end
-  
+
   # PATCH/PUT /events/1
   def update
     begin
@@ -72,7 +72,7 @@ class EventsController < ApplicationController
       return
     end
   end
-  
+
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_event
@@ -84,9 +84,9 @@ class EventsController < ApplicationController
     params.delete :_my_vote
     params.delete :_my_review
     params.delete :_my_ticket
-    @event = Event.find_by(event_id: params[:eventId])
+    @event = Event.find_by(event_id: params[:id])
   end
-  
+
   # Only allow a trusted parameter "white list" through.
   def post_params
     params.require(:event).permit(:name, :description, :time, :location, :total_capacity, :category)

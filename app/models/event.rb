@@ -25,7 +25,7 @@ class Event
     h = super(options)
     @votes = Vote.where(event_id: self.event_id)
     h[:_interest_rating] = get_interest_rating
-    @tickets = Ticket.where(event_id: self.event_id, attending: true)
+    @tickets = Ticket.where(event_id: self.event_id)
     h[:_current_capacity] = @tickets.count
     @reviews = Review.where(event_id: self.event_id)
     h[:_review_matched_desc] = get_matched_desc

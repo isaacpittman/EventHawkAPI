@@ -55,40 +55,40 @@ class VotesController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_vote
-      @vote = Vote.find_by(vote_id: params[:voteId])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_vote
+    @vote = Vote.find_by(vote_id: params[:id])
+  end
 
-    # Only allow a trusted parameter "white list" through.
-    def post_params
-      params.require(:vote).permit(:value, :event_id)
-    end
+  # Only allow a trusted parameter "white list" through.
+  def post_params
+    params.require(:vote).permit(:value, :event_id)
+  end
 
-    def put_params
-      params.delete :vote_id
-      params.delete :voter_id
-      params.delete :event_id
-      params.delete :is_active
-      params.permit(:value)
-    end
+  def put_params
+    params.delete :vote_id
+    params.delete :voter_id
+    params.delete :event_id
+    params.delete :is_active
+    params.permit(:value)
+  end
 
-    def generate_guid
-      SecureRandom.hex(10)
-    end
+  def generate_guid
+    SecureRandom.hex(10)
+  end
 
-    def get_user_id
-      decoded_token = JWT.decode token, Rails.application.secrets.secret_key_base, true, { :algorithm => 'HS256' }
-      (decoded_token[0])['user_id']
-    end
+  def get_user_id
+    decoded_token = JWT.decode token, Rails.application.secrets.secret_key_base, true, { :algorithm => 'HS256' }
+    (decoded_token[0])['user_id']
+  end
 
-    def token
-      params[:token] || token_from_request_headers
-    end
+  def token
+    params[:token] || token_from_request_headers
+  end
 
-    def token_from_request_headers
-      unless request.headers['Authorization'].nil?
-        request.headers['Authorization'].split.last
-      end
+  def token_from_request_headers
+    unless request.headers['Authorization'].nil?
+      request.headers['Authorization'].split.last
     end
+  end
 end

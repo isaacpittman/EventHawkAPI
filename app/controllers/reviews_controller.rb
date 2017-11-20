@@ -55,41 +55,41 @@ class ReviewsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_review
-      @review = Review.find_by(review_id: params[:reviewId])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_review
+    @review = Review.find_by(review_id: params[:id])
+  end
 
-    # Only allow a trusted parameter "white list" through.
-    def post_params
-      params.require(:review).permit(:host_prep, :matched_desc, :would_ret, :event_id)
-    end
+  # Only allow a trusted parameter "white list" through.
+  def post_params
+    params.require(:review).permit(:host_prep, :matched_desc, :would_ret, :event_id)
+  end
 
-    #TODO Move this to validation and supply an error
-    def put_params
-      params.delete :review_id
-      params.delete :reviewer_id
-      params.delete :event_id
-      params.delete :is_active
-      params.permit(:host_prep, :matched_desc, :would_ret)
-    end
+  #TODO Move this to validation and supply an error
+  def put_params
+    params.delete :review_id
+    params.delete :reviewer_id
+    params.delete :event_id
+    params.delete :is_active
+    params.permit(:host_prep, :matched_desc, :would_ret)
+  end
 
-    def generate_guid
-      SecureRandom.hex(10)
-    end
+  def generate_guid
+    SecureRandom.hex(10)
+  end
 
-    def get_user_id
-      decoded_token = JWT.decode token, Rails.application.secrets.secret_key_base, true, { :algorithm => 'HS256' }
-      (decoded_token[0])['user_id']
-    end
+  def get_user_id
+    decoded_token = JWT.decode token, Rails.application.secrets.secret_key_base, true, { :algorithm => 'HS256' }
+    (decoded_token[0])['user_id']
+  end
 
-    def token
-      params[:token] || token_from_request_headers
-    end
+  def token
+    params[:token] || token_from_request_headers
+  end
 
-    def token_from_request_headers
-      unless request.headers['Authorization'].nil?
-        request.headers['Authorization'].split.last
-      end
+  def token_from_request_headers
+    unless request.headers['Authorization'].nil?
+      request.headers['Authorization'].split.last
     end
+  end
 end
