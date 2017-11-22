@@ -11,9 +11,10 @@ class User
   field :is_active, type: Boolean
 
   validates :user_id, presence: true
-  validates :first_name, presence: true
-  validates :last_name, presence: true
+  validates :first_name, presence: true, allow_blank: false, length: { in: 1..30 }
+  validates :last_name, presence: true, allow_blank: false, length: { in: 1..30 }
   validates :email, presence: true
+  validates_format_of :first_name, :last_name, :with => /\A[a-z]+\z/i
 
   has_secure_password
 
