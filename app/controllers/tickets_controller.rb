@@ -34,26 +34,6 @@ class TicketsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /tickets/1
-  def update
-    begin
-      @jwt_token_user = User.find_by(user_id: get_user_id)
-      if @jwt_token_user.user_id == @ticket.attendee_id
-        if @ticket.update(put_params)
-          render :json => @ticket.to_json(:except => :_id), status: :accepted
-        else
-          render json: @ticket.errors, status: :unprocessable_entity
-        end
-      else
-        render status: :forbidden
-        return
-      end
-    rescue Mongoid::Errors::DocumentNotFound
-      render status: :bad_request
-      return
-    end
-  end
-
   def destroy
     @ticket.delete
     render status: :accepted
@@ -67,15 +47,7 @@ class TicketsController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def post_params
-    params.require(:ticket).permit(:attending, :event_id)
-  end
-
-  def put_params
-    params.delete :ticket_id
-    params.delete :attendee_id
-    params.delete :event_id
-    params.delete :is_active
-    params.permit(:attending)
+    params.require(:ticket).permit(:event_id)
   end
 
   def generate_guid
