@@ -5,20 +5,34 @@ class EventsController < ApplicationController
   # GET /events
   def index
     begin
-      if params.key?("category")
-        @events = Event.where(category: params[:category]).only(:event_id)
-      elsif params.key?("location")
-        @events = Event.where(location: params[:location]).only(:event_id)
-      elsif params.key?("attendedBy")
+      @events = nil
+      if params.key?("attendedBy")
         @events = Ticket.where(attendee_id: params[:attendedBy]).only(:event_id)
       elsif params.key?("hostedBy")
         @events = Event.where(host_id: params[:hostedBy]).only(:event_id)
-      else
-        @events = Event.all.only(:event_id)
       end
+
       idArray = []
-      @events.each do |p|
-        idArray.push p.event_id
+      if @events.nil?
+        if params.key?("category") && params.key?("location")
+          @events = Event.where(category: params[:category], location: params[:location]).only(:event_id, :time)
+        elsif params.key?("category") && !params.key?("location")
+          @events = Event.where(category: params[:category]).only(:event_id, :time)
+        elsif !params.key?("category") && params.key?("location")
+          @events = Event.where(location: params[:location]).only(:event_id, :time)
+        else
+          @events = Event.all.only(:event_id, :time)
+        end
+        now = DateTime.now
+        @events.each do |p|
+          if p.time > now
+            idArray.push p.event_id
+          end
+        end
+      else
+        @events.each do |p|
+          idArray.push p.event_id
+        end
       end
       render :json => idArray.to_json, status: :ok
     rescue Exception => error
