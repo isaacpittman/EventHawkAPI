@@ -23,7 +23,7 @@ class TicketsController < ApplicationController
     begin
       tickets = Ticket.where(attendee_id: @jwt_token_user.user_id, event_id: p[:event_id])
       if tickets.count == 0
-        event = Event.find_by(p[:event_id])
+        event = Event.find_by(event_id: p[:event_id])
         if @jwt_token_user.user_id == event.host_id
           render status: :forbidden
         else
