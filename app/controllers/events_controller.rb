@@ -33,23 +33,27 @@ class EventsController < ApplicationController
     p = post_params
     begin
       @jwt_token_user = User.find_by(user_id: get_user_id)
-    rescue Mongoid::Errors::DocumentNotFound
-      render status: :bad_request
+    rescue Exception => error
+      render :json => error.to_json, status: :bad_request
       return
     end
     begin
-      @event = Event.find_by(p)
-      render :json => @event.to_json(:except => :_id), status: :conflict
-    rescue Mongoid::Errors::DocumentNotFound
-      @event = Event.new(post_params)
-      @event.is_active = true
-      @event.event_id = generate_guid
-      @event.host_id = @jwt_token_user.user_id
-      if @event.save
-        render :json => @event.to_json(:except => :_id), status: :created
+      events = Event.where(p)
+      if events.count == 0
+        @event = Event.new(post_params)
+        @event.is_active = true
+        @event.event_id = generate_guid
+        @event.host_id = @jwt_token_user.user_id
+        if @event.save
+          render :json => @event.to_json(:except => :_id), status: :created
+        else
+          render json: @event.errors, status: :unprocessable_entity
+        end
       else
-        render json: @event.errors, status: :unprocessable_entity
+        render :json => @event.to_json(:except => :_id), status: :conflict
       end
+    rescue Exception => error
+      render :json => error.to_json, status: :bad_request
     end
   end
 
