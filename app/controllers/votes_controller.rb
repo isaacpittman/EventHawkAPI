@@ -23,14 +23,19 @@ class VotesController < ApplicationController
     begin
       votes = Vote.where(voter_id: @jwt_token_user.user_id, event_id: p[:event_id])
       if votes.count == 0
-        @vote = Vote.create(p)
-        @vote.is_active = true
-        @vote.vote_id = generate_guid
-        @vote.voter_id = @jwt_token_user.user_id
-        if @vote.save
-          render :json => @vote.to_json(:except => :_id), status: :created
+        event = Event.find_by(p[:event_id])
+        if @jwt_token_user.user_id == event.host_id
+          render status: :forbidden
         else
-          render json: @vote.errors, status: :unprocessable_entity
+          @vote = Vote.create(p)
+          @vote.is_active = true
+          @vote.vote_id = generate_guid
+          @vote.voter_id = @jwt_token_user.user_id
+          if @vote.save
+            render :json => @vote.to_json(:except => :_id), status: :created
+          else
+            render json: @vote.errors, status: :unprocessable_entity
+          end
         end
       else
         render :json => @vote.to_json(:except => :_id), status: :conflict

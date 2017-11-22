@@ -23,14 +23,19 @@ class TicketsController < ApplicationController
     begin
       tickets = Ticket.where(attendee_id: @jwt_token_user.user_id, event_id: p[:event_id])
       if tickets.count == 0
-        @ticket = Ticket.create(p)
-        @ticket.is_active = true
-        @ticket.ticket_id = generate_guid
-        @ticket.attendee_id = @jwt_token_user.user_id
-        if @ticket.save
-          render :json => @ticket.to_json(:except => :_id), status: :created
+        event = Event.find_by(p[:event_id])
+        if @jwt_token_user.user_id == event.host_id
+          render status: :forbidden
         else
-          render json: @ticket.errors, status: :unprocessable_entity
+          @ticket = Ticket.create(p)
+          @ticket.is_active = true
+          @ticket.ticket_id = generate_guid
+          @ticket.attendee_id = @jwt_token_user.user_id
+          if @ticket.save
+            render :json => @ticket.to_json(:except => :_id), status: :created
+          else
+            render json: @ticket.errors, status: :unprocessable_entity
+          end
         end
       else
         render :json => @ticket.to_json(:except => :_id), status: :conflict

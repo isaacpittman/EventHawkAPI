@@ -23,14 +23,19 @@ class ReviewsController < ApplicationController
     begin
       reviews = Review.where(reviewer_id: @jwt_token_user.user_id, event_id: p[:event_id])
       if reviews.count == 0
-        @review = Review.new(p)
-        @review.is_active = true
-        @review.review_id = generate_guid
-        @review.reviewer_id = @jwt_token_user.user_id
-        if @review.save
-          render :json => @review.to_json(:except => :_id), status: :created
+        event = Event.find_by(p[:event_id])
+        if @jwt_token_user.user_id == event.host_id
+          render status: :forbidden
         else
-          render json: @review.errors, status: :unprocessable_entity
+          @review = Review.new(p)
+          @review.is_active = true
+          @review.review_id = generate_guid
+          @review.reviewer_id = @jwt_token_user.user_id
+          if @review.save
+            render :json => @review.to_json(:except => :_id), status: :created
+          else
+            render json: @review.errors, status: :unprocessable_entity
+          end
         end
       else
         render :json => @review.to_json(:except => :_id), status: :conflict
