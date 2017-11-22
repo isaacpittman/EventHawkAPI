@@ -2,9 +2,6 @@ class EventsController < ApplicationController
   before_action :authenticate_user
   before_action :set_event, only: [:show, :update]
 
-  # TODO Enforce GUID uniqueness
-  # TODO Enable delete
-
   # GET /events
   def index
     if params.key?("category")
@@ -25,7 +22,11 @@ class EventsController < ApplicationController
 
   # GET /events/1
   def show
-    render :json => @event.to_json(:except => :_id), status: :ok
+    if @event.nil?
+      render status: :not_found
+    else
+      render :json => @event.to_json(:except => :_id), status: :ok
+    end
   end
 
   # POST /events
@@ -61,19 +62,27 @@ class EventsController < ApplicationController
   def update
     begin
       @jwt_token_user = User.find_by(user_id: get_user_id)
+    rescue Exception => error
+      render :json => error.to_json, status: :bad_request
+      return
+    end
+    begin
       if @jwt_token_user.user_id == @event.host_id
-        if @event.update(put_params)
-          render :json => @event.to_json(:except => :_id), status: :accepted
+        if @event.nil?
+          render status: :not_found
         else
-          render json: @event.errors, status: :unprocessable_entity
+          if @event.update(put_params)
+            render :json => @event.to_json(:except => :_id), status: :accepted
+          else
+            render json: @event.errors, status: :unprocessable_entity
+          end
         end
       else
         render status: :forbidden
         return
       end
-    rescue Mongoid::Errors::DocumentNotFound
-      render status: :bad_request
-      return
+    rescue Exception => error
+      render :json => error.to_json, status: :bad_request
     end
   end
 
@@ -88,7 +97,11 @@ class EventsController < ApplicationController
     params.delete :_my_vote
     params.delete :_my_review
     params.delete :_my_ticket
-    @event = Event.find_by(event_id: params[:id])
+    begin
+      @event = Event.find_by(event_id: params[:id])
+    rescue Mongoid::Errors::DocumentNotFound
+      @event = nil
+    end
   end
 
   # Only allow a trusted parameter "white list" through.

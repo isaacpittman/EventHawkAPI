@@ -1,12 +1,14 @@
 class ReviewsController < ApplicationController
   before_action :authenticate_user
   before_action :set_review, only: [:show, :update]
-  # TODO Enforce one vote per user per event
-  # TODO Enforce GUID uniqueness
 
   # GET /reviews/1
   def show
-    render :json => @review.to_json(:except => :_id), status: :ok
+    if @review.nil?
+      render status: :not_found
+    else
+      render :json => @review.to_json(:except => :_id), status: :ok
+    end
   end
 
   # POST /reviews
@@ -14,23 +16,27 @@ class ReviewsController < ApplicationController
     p = post_params
     begin
       @jwt_token_user = User.find_by(user_id: get_user_id)
-    rescue Mongoid::Errors::DocumentNotFound
-      render status: :bad_request
+    rescue Exception => error
+      render :json => error.to_json, status: :bad_request
       return
     end
     begin
-      @review = Review.find_by(reviewer_id: @jwt_token_user.user_id, event_id: p[:event_id])
-      render :json => @review.to_json(:except => :_id), status: :conflict
-    rescue Mongoid::Errors::DocumentNotFound
-      @review = Review.new(p)
-      @review.is_active = true
-      @review.review_id = generate_guid
-      @review.reviewer_id = @jwt_token_user.user_id
-      if @review.save
-        render :json => @review.to_json(:except => :_id), status: :created
+      reviews = Review.where(reviewer_id: @jwt_token_user.user_id, event_id: p[:event_id])
+      if reviews.count == 0
+        @review = Review.new(p)
+        @review.is_active = true
+        @review.review_id = generate_guid
+        @review.reviewer_id = @jwt_token_user.user_id
+        if @review.save
+          render :json => @review.to_json(:except => :_id), status: :created
+        else
+          render json: @review.errors, status: :unprocessable_entity
+        end
       else
-        render json: @review.errors, status: :unprocessable_entity
+        render :json => @review.to_json(:except => :_id), status: :conflict
       end
+    rescue Exception => error
+      render :json => error.to_json, status: :bad_request
     end
   end
 
@@ -38,26 +44,38 @@ class ReviewsController < ApplicationController
   def update
     begin
       @jwt_token_user = User.find_by(user_id: get_user_id)
+    rescue Exception => error
+      render :json => error.to_json, status: :bad_request
+      return
+    end
+    begin
       if @jwt_token_user.user_id == @review.reviewer_id
-        if @review.update(put_params)
-          render :json => @review.to_json(:except => :_id), status: :accepted
+        if @review.nil?
+          render status: :not_found
         else
-          render json: @review.errors, status: :unprocessable_entity
+          if @review.update(put_params)
+            render :json => @review.to_json(:except => :_id), status: :accepted
+          else
+            render json: @review.errors, status: :unprocessable_entity
+          end
         end
       else
         render status: :forbidden
         return
       end
-    rescue Mongoid::Errors::DocumentNotFound
-      render status: :bad_request
-      return
+    rescue Exception => error
+      render :json => error.to_json, status: :bad_request
     end
   end
 
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_review
-    @review = Review.find_by(review_id: params[:id])
+    begin
+      @review = Review.find_by(review_id: params[:id])
+    rescue Mongoid::Errors::DocumentNotFound
+      @review = nil
+    end
   end
 
   # Only allow a trusted parameter "white list" through.
@@ -65,7 +83,6 @@ class ReviewsController < ApplicationController
     params.require(:review).permit(:host_prep, :matched_desc, :would_ret, :event_id)
   end
 
-  #TODO Move this to validation and supply an error
   def put_params
     params.delete :review_id
     params.delete :reviewer_id

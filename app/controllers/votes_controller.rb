@@ -1,12 +1,14 @@
 class VotesController < ApplicationController
   before_action :authenticate_user
   before_action :set_vote, only: [:show, :update]
-  # TODO Enforce one vote per user per event
-  # TODO Enforce GUID uniqueness
 
   # GET /votes/1
   def show
-    render :json => @vote.to_json(:except => :_id), status: :ok
+    if @vote.nil?
+      render status: :not_found
+    else
+      render :json => @vote.to_json(:except => :_id), status: :ok
+    end
   end
 
   # POST /votes
@@ -14,23 +16,27 @@ class VotesController < ApplicationController
     p = post_params
     begin
       @jwt_token_user = User.find_by(user_id: get_user_id)
-    rescue Mongoid::Errors::DocumentNotFound
-      render status: :bad_request
+    rescue Exception => error
+      render :json => error.to_json, status: :bad_request
       return
     end
     begin
-      @vote = Vote.find_by(voter_id: @jwt_token_user.user_id, event_id: p[:event_id])
-      render :json => @vote.to_json(:except => :_id), status: :conflict
-    rescue Mongoid::Errors::DocumentNotFound
-      @vote = Vote.create(p)
-      @vote.is_active = true
-      @vote.vote_id = generate_guid
-      @vote.voter_id = @jwt_token_user.user_id
-      if @vote.save
-        render :json => @vote.to_json(:except => :_id), status: :created
+      votes = Vote.where(voter_id: @jwt_token_user.user_id, event_id: p[:event_id])
+      if votes.count == 0
+        @vote = Vote.create(p)
+        @vote.is_active = true
+        @vote.vote_id = generate_guid
+        @vote.voter_id = @jwt_token_user.user_id
+        if @vote.save
+          render :json => @vote.to_json(:except => :_id), status: :created
+        else
+          render json: @vote.errors, status: :unprocessable_entity
+        end
       else
-        render json: @vote.errors, status: :unprocessable_entity
+        render :json => @vote.to_json(:except => :_id), status: :conflict
       end
+    rescue Exception => error
+      render :json => error.to_json, status: :bad_request
     end
   end
 
@@ -38,26 +44,38 @@ class VotesController < ApplicationController
   def update
     begin
       @jwt_token_user = User.find_by(user_id: get_user_id)
+    rescue Exception => error
+      render :json => error.to_json, status: :bad_request
+      return
+    end
+    begin
       if @jwt_token_user.user_id == @vote.voter_id
-        if @vote.update(put_params)
-          render :json => @vote.to_json(:except => :_id), status: :accepted
+        if @vote.nil?
+          render status: :not_found
         else
-          render json: @vote.errors, status: :unprocessable_entity
+          if @vote.update(put_params)
+            render :json => @vote.to_json(:except => :_id), status: :accepted
+          else
+            render json: @vote.errors, status: :unprocessable_entity
+          end
         end
       else
         render status: :forbidden
         return
       end
-    rescue Mongoid::Errors::DocumentNotFound
-      render status: :bad_request
-      return
+    rescue Exception => error
+      render :json => error.to_json, status: :bad_request
     end
   end
 
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_vote
-    @vote = Vote.find_by(vote_id: params[:id])
+    begin
+      @vote = Vote.find_by(vote_id: params[:id])
+    rescue Mongoid::Errors::DocumentNotFound
+      @vote = nil
+    end
   end
 
   # Only allow a trusted parameter "white list" through.
