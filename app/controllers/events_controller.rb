@@ -1,5 +1,6 @@
 class EventsController < ApplicationController
   before_action :authenticate_user
+  before_action :set_token_user, only: [:create, :show, :update]
   before_action :set_event, only: [:show, :update]
 
   # GET /events
@@ -42,19 +43,25 @@ class EventsController < ApplicationController
 
   # GET /events/1
   def show
+    if @jwt_token_user.nil?
+      render :json => error.to_json, status: :bad_request
+      return
+    end
     if @event.nil?
       render status: :not_found
     else
-      render :json => @event.to_json(:except => :_id), status: :ok
+      h = JSON.parse(@event.to_json(:except => :_id))
+      h[:_my_vote] = get_my_vote_id
+      h[:_my_review] = get_my_review_id
+      h[:_my_ticket] = get_my_ticket_id
+      render :json => h.to_json, status: :ok
     end
   end
 
   # POST /events
   def create
     p = post_params
-    begin
-      @jwt_token_user = User.find_by(user_id: get_user_id)
-    rescue Exception => error
+    if @jwt_token_user.nil?
       render :json => error.to_json, status: :bad_request
       return
     end
@@ -80,9 +87,7 @@ class EventsController < ApplicationController
 
   # PATCH/PUT /events/1
   def update
-    begin
-      @jwt_token_user = User.find_by(user_id: get_user_id)
-    rescue Exception => error
+    if @jwt_token_user.nil?
       render :json => error.to_json, status: :bad_request
       return
     end
@@ -124,6 +129,14 @@ class EventsController < ApplicationController
     end
   end
 
+  def set_token_user
+    begin
+      @jwt_token_user = User.find_by(user_id: get_user_id)
+    rescue Exception => error
+      @jwt_token_user = nil
+    end
+  end
+
   # Only allow a trusted parameter "white list" through.
   def post_params
     params.require(:event).permit(:name, :description, :time, :location, :total_capacity, :category)
@@ -143,6 +156,33 @@ class EventsController < ApplicationController
   def get_user_id
     decoded_token = JWT.decode token, Rails.application.secrets.secret_key_base, true, { :algorithm => 'HS256' }
     (decoded_token[0])['user_id']
+  end
+
+  def get_my_vote_id
+    begin
+      vote = Vote.find_by(event_id: params[:id], voter_id: @jwt_token_user.user_id)
+      vote.vote_id
+    rescue Mongoid::Errors::DocumentNotFound
+      nil
+    end
+  end
+
+  def get_my_review_id
+    begin
+      review = Review.find_by(event_id: params[:id], reviewer_id: @jwt_token_user.user_id)
+      review.review_id
+    rescue Mongoid::Errors::DocumentNotFound
+      nil
+    end
+  end
+
+  def get_my_ticket_id
+    begin
+      ticket = Ticket.find_by(event_id: params[:id], attendee_id: @jwt_token_user.user_id)
+      ticket.ticket_id
+    rescue Mongoid::Errors::DocumentNotFound
+      nil
+    end
   end
 
   def token

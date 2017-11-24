@@ -32,9 +32,6 @@ class Event
     h[:_review_matched_desc] = get_matched_desc
     h[:_review_host_prep] = get_host_prep
     h[:_review_would_ret] = get_would_ret
-    h[:_my_vote] = ""
-    h[:_my_review] = ""
-    h[:_my_ticket] = ""
     h
   end
 
