@@ -18,7 +18,7 @@ class Event
   validates :time, presence: true
   validates :location, presence: true, allow_blank: false, length: { in: 1..30 }
   validates :total_capacity, presence: true, allow_nil: false, numericality: { only_integer: true, greater_than_or_equal_to: 5, less_than_or_equal_to: 50 }
-  validates :category, presence: true, allow_blank: false, inclusion: { in: %w(SPORTS GAMES MUSIC ART EDUCATION), message: "%{value} is not a valid category" }
+  validates :category, presence: true, allow_blank: false, inclusion: { in: %w(SPORTS GAMES MUSIC MOVIES ART EDUCATION FOOD), message: "%{value} is not a valid category" }
   validates :host_id, presence: true
   validate :check_future
 
