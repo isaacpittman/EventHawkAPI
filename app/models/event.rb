@@ -44,29 +44,44 @@ class Event
   end
 
   def get_matched_desc
-    rating = 0
-    @reviews.each do |v|
-      rating = rating + v.matched_desc
+    if @reviews.count == 0
+      nil
+    else
+      rating = 0.0
+      @reviews.each do |v|
+        rating = rating + v.matched_desc
+      end
+      potential = 5 * @reviews.count
+      ((rating / potential) * 100).round
     end
-    rating
   end
 
   def get_host_prep
-    rating = 0
-    @reviews.each do |v|
-      rating = rating + v.host_prep
+    if @reviews.count == 0
+      nil
+    else
+      rating = 0.0
+      @reviews.each do |v|
+        rating = rating + v.host_prep
+      end
+      potential = 5 * @reviews.count
+      ((rating / potential) * 100).round
     end
-    rating
   end
 
   def get_would_ret
-    rating = 0
-    @reviews.each do |v|
-      if v.would_ret
-        rating = rating + 1
+    if @reviews.count == 0
+      nil
+    else
+      rating = 0.0
+      @reviews.each do |v|
+        if v.would_ret
+          rating = rating + 1
+        end
       end
+      potential = @reviews.count
+      ((rating / potential) * 100).round
     end
-    rating
   end
 
   def check_future
